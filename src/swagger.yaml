@@ -1,0 +1,813 @@
+openapi: "3.0.0"
+info:
+  title: "API Contract SIMS PPOB"
+  description: "Documentation for Take Home Test API"
+  version: "1.0.0"
+servers:
+- url: https://103.150.196.144:8443/
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+paths:
+  /registration:
+    post:
+      tags:
+      - "1. Module Membership"
+      description: "**API Registration Public (Tidak perlu Token untuk mengaksesnya)**\n\nDigunakan untuk melakukan registrasi User agar bisa Login kedalam aplikasi.\n\nKetentuan:\n1. Parameter request email harus terdapat validasi format **email**.\n2. Parameter request **password** Length minimal 8 karakter.\n3. Handling Response sesuai dokumentasi Response dibawah."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: "user@nutech-integrasi.com"
+                  description: "Email of the user, must be in valid format."
+                first_name:
+                  type: string
+                  example: "User"
+                  description: "First name of the user."
+                last_name:
+                  type: string
+                  example: "Nutech"
+                  description: "Last name of the user."
+                password:
+                  type: string
+                  example: "test12345"
+                  description: "Password of the user, minimum 8 characters."
+      responses:
+        "200":
+          description: "Request Successfully"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: "Registrasi berhasil silahkan login"
+                  data:
+                    type: object
+                    nullable: true
+        "400":
+          description: "Bad Request"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 102
+                  message:
+                    type: string
+                    example: "Paramter email tidak sesuai format"
+                  data:
+                    type: object
+                    nullable: true
+  /login:
+    post:
+      tags:
+      - "1. Module Membership"
+      description: "**API Login Public (Tidak perlu Token untuk mengaksesnya)**\n\nDigunakan untuk melakukan login dan mendapatkan authentication berupa JWT (Json Web Token)\n\nKetentuan :\n1. Parameter request **email** harus terdapat validasi format email\n2. Parameter request **password** Length minimal 8 karakter\n3. **JWT** yang digenerate harus memuat payload **email** dan di set **expiration** selama 12 jam dari waktu di generate\n4. Handling Response sesuai dokumentasi Response dibawah"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "user@nutech-integrasi.com"
+                password:
+                  type: string
+                  minLength: 8
+                  example: "abcdef1234"
+      responses:
+        "200":
+          description: "Berhasil login"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: "Login Sukses"
+                  data:
+                    type: object
+                    properties:
+                      token:
+                        type: string
+                        example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjoiNTRVdXRjYTdCS0ZPX0ZUZGZ1bXlJem9zSTRKa1VxUGZVZ0ROSTUwelRTQlo2aHoyY0hKZ1VMb1loM09HUUd0ekQxV3dTX194aHBNZTE2SGFscVRzcEhjS21UclJ3S2FYYmZob3AzdzFFUHJ2NFdBQmk1c0RpdV9DSnZTSWt2MDFTbEU0QU5pbVB0bUx5azZoUzlOalVQNEZaVVpfRVBtcEk4Y3pNc3ZWa2JFPSIsImlhdCI6MTYyNjkyODk3MSwiZXhwIjoyNTU2MTE4Nzk4fQ.9C9NvhZYKivhGWnrjo4Wr1Rv-wur1wCm0jqfK9XDD8U"
+        '400':
+          description: "Bad Request"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 102
+                  message:
+                    type: string
+                    example: "Parameter email tidak sesuai format"
+                  data:
+                    type: string
+                    example: null
+        '401':
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 103
+                  message:
+                    type: string
+                    example: "Username atau password salah"
+                  data:
+                    type: string
+                    example: null
+  /profile:
+    get:
+      tags:
+      - "1. Module Membership"
+      description: "**API Profile Private (memerlukan Token untuk mengaksesnya)**\n\nDigunakan untuk mendapatkan informasi profile User.\n\nKetentuan:\n1. Service ini harus menggunakan **Bearer Token JWT** untuk mengaksesnya.\n2. Tidak ada parameter email di query param URL ataupun request body; parameter email diambil dari payload JWT yang didapatkan dari hasil login. \n3. Handling Response sesuai dokumentasi Response di bawah."
+      security:
+      - bearerAuth: []
+      responses:
+        "200":
+          description: "Request Successfully"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: "Sukses"
+                  data:
+                    type: object
+                    properties:
+                      email:
+                        type: string
+                        example: "user@nutech-integrasi.com"
+                      first_name:
+                        type: string
+                        example: "User Name"
+                      last_name:
+                        type: string
+                        example: "nutech"
+                      profile_image:
+                        type: string
+                        example: "http://localhost:8081/image.jpg"
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 103
+                  message:
+                    type: string
+                    example: "Token tidak valid atau kadaluwarsa"
+                  data:
+                    type: null
+  /profile/update:
+    put:
+      tags:
+      - "1. Module Membership"
+      description: "**API Update Profile Private (memerlukan Token untuk mengaksesnya)**\n\n Digunakan untuk mengupdate data profil User.\n\n Ketentuan:\n - Service ini harus menggunakan **Bearer Token JWT** untuk mengaksesnya.\n - Tidak ada parameter email di query param URL ataupun request body; parameter email diambil dari payload JWT yang didapatkan dari hasil login.\n - Handling Response sesuai dokumentasi Response di bawah."
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                first_name:
+                  type: string
+                  example: "User Edited"
+                last_name:
+                  type: string
+                  example: "Nutech Edited"
+      responses:
+        '200':
+          description: "Request successfully"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: "Update Profile berhasil"
+                  data:
+                    type: object
+                    properties:
+                      email:
+                        type: string
+                        example: "user@nutech-integrasi.com"
+                      first_name:
+                        type: string
+                        example: "User Edited"
+                      last_name:
+                        type: string
+                        example: "Nutech Edited"
+                      profile_image:
+                        type: string
+                        example: "https://yoururlapi.com/profile.jpeg"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 108
+                  message:
+                    type: string
+                    example: "Token tidak valid atau kadaluwarsa"
+                  data:
+                    type: string
+                    example: null
+  /profile/image:
+    put:
+      tags:
+      - "1. Module Membership"
+      description: "**API Upload Profile Image Private (memerlukan Token untuk mengaksesnya)**\n\nDigunakan untuk mengupdate / upload profile image User.\n\nKetentuan:\n - Service ini harus menggunakan **Bearer Token JWT untuk mengaksesnya**.\n - Tidak ada parameter email di query param URL ataupun request body; parameter email diambil dari payload JWT yang didapatkan dari hasil login.\n - Format Image yang boleh di upload hanya **jpeg dan png**.\n - Handling Response sesuai dokumentasi Response di bawah."
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                profileImage:
+                  type: string
+                  format: binary
+      responses:
+        "200":
+          description: "Request successfully"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: "Update Profile berhasil"
+                  data:
+                    type: object
+                    properties:
+                      email:
+                        type: string
+                        example: "user@nutech-integrasi.com"
+                      first_name:
+                        type: string
+                        example: "User Edited"
+                      last_name:
+                        type: string
+                        example: "Nutech Edited"
+                      profile_image:
+                        type: string
+                        example: "https://yoururlapi.com/profile.jpeg"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 102
+                  message:
+                    type: string
+                    example: "Format Image tidak sesuai"
+                  data:
+                    type: null
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 108
+                  message:
+                    type: string
+                    example: "Token tidak valid atau kadaluwarsa"
+                  data:
+                    type: string
+                    example: null
+
+  /banner:
+    get:
+      tags:
+      - "2. Module Information"
+      description: "**API Banner Public (tidak memerlukan Token untuk mengaksesnya)**\n\nDigunakan untuk mendapatkan list banner.\n\nKetentuan:\n- Buat data list banner sesuai dokumentasi Response di bawah, usahakan banner ini tidak di hardcode, melainkan ambil dari database.\n- Tidak perlu membuatkan module CRUD banner.\n- Handling Response sesuai dokumentasi Response di bawah."
+      security:
+      - bearerAuth: []
+      responses:
+        "200":
+          description: "Request berhasil"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: "Sukses"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        banner_name:
+                          type: string
+                          example: "Banner 1"
+                        banner_image:
+                          type: string
+                          example: "https://nutech-integrasi.app/dummy.jpg"
+                        description:
+                          type: string
+                          example: "Lerem Ipsum Dolor sit amet"
+              example:
+                status: 0
+                message: "Sukses"
+                data:
+                - banner_name: "Banner 1"
+                  banner_image: "https://nutech-integrasi.app/dummy.jpg"
+                  description: "Lerem Ipsum Dolor sit amet"
+                - banner_name: "Banner 2"
+                  banner_image: "https://nutech-integrasi.app/dummy.jpg"
+                  description: "Lerem Ipsum Dolor sit amet"
+                - banner_name: "Banner 3"
+                  banner_image: "https://nutech-integrasi.app/dummy.jpg"
+                  description: "Lerem Ipsum Dolor sit amet"
+                - banner_name: "Banner 4"
+                  banner_image: "https://nutech-integrasi.app/dummy.jpg"
+                  description: "Lerem Ipsum Dolor sit amet"
+                - banner_name: "Banner 5"
+                  banner_image: "https://nutech-integrasi.app/dummy.jpg"
+                  description: "Lerem Ipsum Dolor sit amet"
+
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 108
+                  message:
+                    type: string
+                    example: "Token tidak valid atau kadaluwarsa"
+                  data:
+                    type: string
+                    example: null
+
+  /services:
+    get:
+      tags:
+      - "2. Module Information"
+      description: "**API Services Private (memerlukan Token untuk mengaksesnya)**\n\nDigunakan untuk mendapatkan list Service/Layanan PPOB\n\nKetentuan:\n- Buat data list Service/Layanan sesuai dokumentasi Response dibawah, usahakan data list **Service** atau **Layanan** ini tidak di hardcode, melainkan ambil dari database\n- Tidak perlu membuatkan module CRUD Service/Layanan.\n- Handling Response sesuai dokumentasi Response di bawah."
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: "Request berhasil"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: "Sukses"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        service_code:
+                          type: string
+                          example: "PAJAK"
+                        service_name:
+                          type: string
+                          example: "Pajak PBB"
+                        service_icon:
+                          type: string
+                          example: "https://nutech-integrasi.app/dummy.jpg"
+                        service_tarif:
+                          type: integer
+                          example: 40000
+              example:
+                status: 0
+                message: "Sukses"
+                data:
+                - service_code: "PAJAK"
+                  service_name: "Pajak PBB"
+                  service_icon: "https://nutech-integrasi.app/dummy.jpg"
+                  service_tarif: 40000
+                - service_code: "PLN"
+                  service_name: "Listrik"
+                  service_icon: "https://nutech-integrasi.app/dummy.jpg"
+                  service_tarif: 10000
+                - service_code: "PDAM"
+                  service_name: "PDAM Berlangganan"
+                  service_icon: "https://nutech-integrasi.app/dummy.jpg"
+                  service_tarif: 40000
+                - service_code: "PULSA"
+                  service_name: "Pulsa"
+                  service_icon: "https://nutech-integrasi.app/dummy.jpg"
+                  service_tarif: 40000
+                - service_code: "PGN"
+                  service_name: "PGN Berlangganan"
+                  service_icon: "https://nutech-integrasi.app/dummy.jpg"
+                  service_tarif: 50000
+                - service_code: "MUSIK"
+                  service_name: "Musik Berlangganan"
+                  service_icon: "https://nutech-integrasi.app/dummy.jpg"
+                  service_tarif: 50000
+                - service_code: "TV"
+                  service_name: "TV Berlangganan"
+                  service_icon: "https://nutech-integrasi.app/dummy.jpg"
+                  service_tarif: 50000
+                - service_code: "PAKET_DATA"
+                  service_name: "Paket Data"
+                  service_icon: "https://nutech-integrasi.app/dummy.jpg"
+                  service_tarif: 50000
+                - service_code: "VOUCHER_GAME"
+                  service_name: "Voucher Game"
+                  service_icon: "https://nutech-integrasi.app/dummy.jpg"
+                  service_tarif: 100000
+                - service_code: "VOUCHER_MAKANAN"
+                  service_name: "Voucher Makanan"
+                  service_icon: "https://nutech-integrasi.app/dummy.jpg"
+                  service_tarif: 100000
+                - service_code: "QURBAN"
+                  service_name: "Qurban"
+                  service_icon: "https://nutech-integrasi.app/dummy.jpg"
+                  service_tarif: 200000
+                - service_code: "ZAKAT"
+                  service_name: "Zakat"
+                  service_icon: "https://nutech-integrasi.app/dummy.jpg"
+                  service_tarif: 300000
+
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 108
+                  message:
+                    type: string
+                    example: "Token tidak valid atau kadaluwarsa"
+                  data:
+                    type: string
+                    example: null
+
+  /balance:
+    get:
+      tags:
+      - "3. Module Transaction"
+      description: "**API Balance Private (memerlukan Token untuk mengaksesnya)**\n\nDigunakan untuk mendapatkan informasi balance / saldo terakhir dari User\n\nKetentuan :\n1. Service ini harus menggunakan **Bearer Token JWT** untuk mengaksesnya\n2. Tidak ada parameter email di query param url ataupun request body, parameter email diambil dari payload JWT yang didapatkan dari hasil login\n3. Handling Response sesuai dokumentasi Response dibawah"
+      security:
+      - bearerAuth: []
+      responses:
+        "200":
+          description: "Request successfully"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: "Get Balance berhasil"
+                  data:
+                    type: object
+                    properties:
+                      balance:
+                        type: integer
+                        example: 100000
+
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 108
+                  message:
+                    type: string
+                    example: "Token tidak valid atau kadaluwarsa"
+                  data:
+                    type: string
+                    example: null
+
+  /topup:
+    post:
+      tags:
+      - "3. Module Transaction"
+      description: "**API Topup Private (memerlukan Token untuk mengaksesnya)**\n\nDigunakan untuk melakukan top up balance / saldo dari User\n\nKetentuan: \n1. Service ini harus menggunakan **Bearer Token JWT** untuk mengaksesnya\n2. Tidak ada parameter email di query param url ataupun request body, parameter email diambil dari payload JWT yang didapatkan dari hasil login\n3. Setiap kali melakukan Top Up maka balance / saldo dari User otomatis bertambah\n4. Parameter **amount** hanya boleh angka saja dan tidak boleh lebih kecil dari 0\n5. Pada saat Top Up set transaction_type di database menjadi **TOPUP**\n6. Handling Response sesuai dokumentasi Response dibawah"
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                top_up_amount:
+                  type: integer
+                  example: 100000
+      responses:
+        "200":
+          description: "Request successfully"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: "Get Balance berhasil"
+                  data:
+                    type: object
+                    properties:
+                      balance:
+                        type: integer
+                        example: 100000
+        "400":
+          description: "Bad Request"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 108
+                  message:
+                    type: string
+                    example: "Parameter top_up_amount hanya boleh angka dan tidak boleh lebih kecil dari 0"
+                  data:
+                    type: string
+                    example: null
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 108
+                  message:
+                    type: string
+                    example: "Token tidak valid atau kadaluwarsa"
+                  data:
+                    type: string
+                    example: null
+
+  /transaction:
+    post:
+      tags:
+      - "3. Module Transaction"
+      description: "**API Transaction Private (memerlukan token untuk mengaksesnya)**\n\nDigunakan untuk melakukan transaksi dari services / layanan yang tersedia\n\nKetentuan: \n1. Service ini harus menggunakan **Bearer Token JWT** untuk mengaksesnya\n2. Tidak ada parameter email di query param url ataupun request body, parameter email diambil dari payload JWT yang didapatkan dari hasil login\n3. Setiap kali melakukan Transaksi harus dipastikan balance / saldo mencukupi\n4. Pada saat Transaction set transaction_type di database menjadi **PAYMENT**\n5. Handling Response sesuai dokumentasi Response dibawah\n6. Response **invoice_number** untuk formatnya generate bebas"
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                service_code:
+                  type: string
+                  example: "PAJAK"
+      responses:
+        "200":
+          description: "Request successfully"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: "Transaksi Berhasil"
+                  data:
+                    type: object
+                    properties:
+                      invoice_number:
+                        type: string
+                        example: "1730307346582"
+                      service_code:
+                        type: string
+                        example: "PLN"
+                      service_name:
+                        type: string
+                        example: "Listrik"
+                      transaction_type:
+                        type: string
+                        example: "PAYMENT"
+                      total_amount:
+                        type: integer
+                        example: 40000
+                      created_on:
+                        type: string
+                        example: "2024-10-30T16:55:46.582Z"
+        "400":
+          description: "Bad Request"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 108
+                  message:
+                    type: string
+                    example: "Parameter top_up_amount hanya boleh angka dan tidak boleh lebih kecil dari 0"
+                  data:
+                    type: string
+                    example: null
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+ 
+  /transaction/history:
+    get:
+      tags:
+      - "3. Module Transaction"
+      description: "**API History Private (memerlukan Token untuk mengaksesnya)**\n\nDigunakan untuk mendapatkan informasi history transaksi.\n\nKetentuan:\n1. Service ini harus menggunakan **Bearer Token JWT** untuk mengaksesnya.\n2. Tidak ada parameter email di query param URL ataupun request body, parameter email diambil dari payload JWT yang didapatkan dari hasil login.\n3. Terdapat parameter **limit** yang bersifat **opsional**, jika limit tidak dikirim maka tampilkan semua data.\n4. Data di order dari yang paling baru berdasarkan transaction date (created_on).\n5. Handling Response sesuai dokumentasi Response dibawah."
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: limit
+        in: query
+        schema:
+          type: integer
+        required: false
+        description: "Number of records to return."
+      - name: offset
+        in: query
+        schema:
+          type: integer
+        required: false
+        description: "Number of records to skip."
+      responses:
+        "200":
+          description: "Get History Transaksi berhasil"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: "Get History Berhasil"
+                  data:
+                    type: object
+                    properties:
+                      limit:
+                        type: integer
+                        example: 3
+                      offset:
+                        type: integer
+                        example: 0
+                      records:
+                        type: array
+                        items:
+                          properties:
+                            invoice_number:
+                              type: string
+                              example: "INV17082023-001"
+                            transaction_type:
+                              type: string
+                              example: "TOPUP"
+                            description:
+                              type: string
+                              example: "Top Up balance"
+                            total_amount:
+                              type: integer
+                              example: 40000
+                            created_on:
+                              type: string
+                              example: "2023-08-17T10:10:10.000Z"
+                example:
+                  status: 0
+                  message: "Get History berhasil"
+                  data:
+                  - invoice_number: "INV17082023-001"
+                    transaction_type: "TOPUP"
+                    description: "Top Up balance"
+                    total_amount: 40000
+                    created_on: "2023-08-17T10:10:10.000Z"
+                  - invoice_number: "INV17082023-001"
+                    transaction_type: "TOPUP"
+                    description: "Top Up balance"
+                    total_amount: 10000
+                    created_on: "2023-08-17T10:10:10.000Z"
+                  - invoice_number: "INV17082023-001"
+                    transaction_type: "TOPUP"
+                    description: "Top Up balance"
+                    total_amount: 40000
+                    created_on: "2023-08-17T10:10:10.000Z"
+
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 401
+                  message:
+                    type: string
+                    example: "Token tidak valid atau kadaluwarsa"
+                  data:
+                    type: null
