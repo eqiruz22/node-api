@@ -12,17 +12,17 @@ import multer from "multer";
 import https from "https";
 import { ResponseJSON } from "./utils/response.js";
 const app = express();
-app.disable("x-powered-by")
-app.disable("etag")
+app.disable("x-powered-by");
+app.disable("etag");
 const port = 8443;
 const dirname = path.dirname(new URL(import.meta.url).pathname);
 const swaggerSpec = yaml.load(
   fs.readFileSync(path.resolve("./swagger.yaml"), "utf-8")
 );
 const sslOpt = {
- key: fs.readFileSync("key.pem"),
- cert: fs.readFileSync("cert.pem"),
-}
+  key: fs.readFileSync("key.pem"),
+  cert: fs.readFileSync("cert.pem"),
+};
 dotenv.config();
 app.use(cors());
 app.use((req, res, next) => {
@@ -46,10 +46,6 @@ app.use((err, req, res, next) => {
   }
   next();
 });
-https.createServer(sslOpt,app).listen(port, () => {
-	console.log(`server running via https port ${port}`)
-})
-//app.listen(port,() => {
-//  console.log(`server running on port ${port}`);
-//});
-
+https.createServer(sslOpt, app).listen(port, () => {
+  console.log(`server running via https port ${port}`);
+});
